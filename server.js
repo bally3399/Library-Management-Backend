@@ -23,11 +23,10 @@ cloudinary.config({
     api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-// Configure Redis
-const redisClient = redis.createClient({
-    url: process.env.REDIS_CONNECTION,
-});
+const ioredis = require('ioredis');
+const redisClient = new ioredis(process.env.REDIS_CONNECTION);
 redisClient.on('error', (err) => console.log('Redis Client Error:', err));
+redisClient.on('connect', () => console.log('Redis connected'));
 
 // PostgreSQL Connection Test Route
 app.get('/test-db', async (req, res) => {
