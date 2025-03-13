@@ -1,22 +1,22 @@
 const express = require('express');
-const pool = require('./db');
-const redis = require('redis');
-const AWS = require('aws-sdk');
-const cloudinary = require('cloudinary').v2;
-const jwt = require('jsonwebtoken');
-require('dotenv').config();
+const pool = require('./db'); // PostgreSQL connection
+const redis = require('redis'); // Redis client
+const AWS = require('aws-sdk'); // AWS S3
+const cloudinary = require('cloudinary').v2; // Cloudinary
+const jwt = require('jsonwebtoken'); // JWT
+require('dotenv').config(); // Load .env variables
 
 const app = express();
-app.use(express.json());
+app.use(express.json()); // Parse JSON requests
 
-
+// Configure AWS S3
 const s3 = new AWS.S3({
     accessKeyId: process.env.AWS_ACCESS_KEY_ID,
     secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
     region: process.env.AWS_REGION,
 });
 
-
+// Configure Cloudinary
 cloudinary.config({
     cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
     api_key: process.env.CLOUDINARY_API_KEY,
@@ -27,7 +27,7 @@ cloudinary.config({
 const redisClient = redis.createClient({
     url: process.env.REDIS_CONNECTION,
 });
-redisClient.on('error', (err) => console.log('Redis Client Error', err));
+redisClient.on('error', (err) => console.log('Redis Client Error:', err));
 
 // PostgreSQL Connection Test Route
 app.get('/test-db', async (req, res) => {
@@ -53,10 +53,10 @@ app.get('/users', async (req, res) => {
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, async () => {
     console.log(`Server running on port ${PORT}`);
-    try {
-        await redisClient.connect();
-        console.log('Redis connected');
-    } catch (err) {
-        console.error('Redis connection error:', err);
-    }
+    // try {
+    //     await redisClient.connect();
+    //     console.log('Redis connected');
+    // } catch (err) {
+    //     console.error('Redis connection error:', err);
+    // }
 });
