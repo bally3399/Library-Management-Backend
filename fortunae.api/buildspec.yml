@@ -1,0 +1,28 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      dotnet: 8.0
+    commands:
+      - echo "Installing dependencies..."
+      - dotnet restore
+
+  build:
+    commands:
+      - echo "Building the application..."
+      - dotnet publish -c Release -o ./publish
+
+  post_build:
+    commands:
+      - echo "Zipping deployment package..."
+      - zip -r deploy.zip ./publish
+      - echo "Uploading to S3..."
+      - aws s3 cp deploy.zip s3://$S3_BUCKET_NAME/deploy.zip
+      - echo "Updating Elastic Beanstalk environment..."
+      - aws elasticbeanstalk create-application-version --application-name $EB_APP_NAME --version-label $CODEBUILD_BUILD_ID --source-bundle S3Bucket=$S3_BUCKET_NAME,S3Key=deploy.zip
+      - aws elasticbeanstalk update-environment --application-name $EB_APP_NAME --environment-name $EB_ENV_NAME --version-label $CODEBUILD_BUILD_ID
+
+artifacts:
+  files:
+    - deploy.zip
